@@ -194,7 +194,14 @@ fn      main() -> io::Result<()>
 
         firstState = createFirstState(file);
         firstState.print();
-        println!("{}", isItDoable(firstState));
+        if isItDoable(firstState) == 0
+        {
+            println!("Doable");
+        }
+        else
+        {
+            println!("Not Doable");
+        }
     }
     Ok(())
 }
