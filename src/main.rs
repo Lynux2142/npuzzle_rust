@@ -8,6 +8,7 @@ trait Funct
 {
     fn print(&self);
     fn getFinalCoord(&self, value: i32) -> i32;
+    fn swap(&self, action: char) -> State;
 }
 
 #[allow(non_snake_case)]
@@ -15,6 +16,7 @@ struct State
 {
     size: usize,
     grid: Vec<Vec<i32>>,
+    hole: (i32, i32),
     finalGrid: Vec<Vec<i32>>
 }
 
@@ -55,7 +57,31 @@ impl Funct for State
                 return i as i32;
             }
         }
-        return -1;
+        -1
+    }
+
+    fn swap(&self, action: char) -> State
+    {
+        let mut newState = self.clone();
+        let mut x = 0;
+        let mut y = 0;
+
+        if (action == 'E' && self.hole.0 < self.size as i32 - 1) || (action == 'W' && self.hole.0 > 0)
+        {
+            x = if action == 'E' { 1 } else { -1 };
+        }
+        if (action == 'S' && self.hole.1 < self.size as i32 - 1) || (action == 'N' && self.hole.1 > 0)
+        {
+            y = if action == 'S' { 1 } else { -1 };
+        }
+        /*
+        newState.grid[self.hole.1 as usize][self.hole.0 as usize] = newState.grid[(self.hole.1 + y) as usize][(self.hole.0 + x) as usize];
+        newState.grid[(self.hole.1 + y) as usize][(self.hole.0 + x) as usize] = 0;
+        newState.hole.0 += x;
+        newState.hole.1 += y;
+        */
+
+        State { size: 0, grid: vec![vec![0i32; 4]; 4], hole: (-1, -1), finalGrid: vec![vec![0i32; 4]; 4] }
     }
 }
 
@@ -108,7 +134,7 @@ fn      makeFinalGrid(size: usize) -> Vec<Vec<i32>>
         }
         xMinMax.0 += 1;
     }
-    return grid;
+    grid
 }
 
 #[allow(non_snake_case)]
@@ -118,6 +144,7 @@ fn      createFirstState(file: File) -> State
     let mut size: usize = 0;
     let mut grid = vec![vec![0i32; 1]; 1];
     let mut y = 0;
+    let mut hole = (-1, -1);
 
     for line in reader.lines()
     {
@@ -133,17 +160,22 @@ fn      createFirstState(file: File) -> State
                 for value in i
                 {
                     grid[y][x] = value.parse::<i32>().unwrap();
+                    if grid[y][x] == 0
+                    {
+                        hole.0 = x as i32;
+                        hole.1 = y as i32;
+                    }
                     x += 1;
                 }
                 y += 1;
             }
         }
     }
-    return State { size: size, grid: grid, finalGrid: makeFinalGrid(size) };
+    State { size: size, grid: grid, hole: hole, finalGrid: makeFinalGrid(size) }
 }
 
 #[allow(non_snake_case)]
-fn      isItDoable(firstState: State) -> i32
+fn      isItDoable(firstState: &State) -> i32
 {
     let n;
     let mut j = -1;
@@ -177,7 +209,13 @@ fn      isItDoable(firstState: State) -> i32
             j += 1;
         }
     }
-    return 1 & np;
+    1 & np
+}
+
+#[allow(non_snake_case)]
+fn      resolve(firstState: &State)
+{
+    firstState.swap('E');
 }
 
 #[allow(non_snake_case)]
@@ -193,10 +231,11 @@ fn      main() -> io::Result<()>
         file = File::open(&args[1])?;
 
         firstState = createFirstState(file);
+        println!("First State:");
         firstState.print();
-        if isItDoable(firstState) == 0
+        if isItDoable(&firstState) == 0
         {
-            println!("Doable");
+            resolve(&firstState);
         }
         else
         {
