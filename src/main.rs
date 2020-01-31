@@ -3,9 +3,11 @@ use std::fs::File;
 use std::io::{self, BufRead, BufReader};
 use std::vec::Vec;
 
+#[allow(non_snake_case)]
 trait Funct
 {
     fn print(&self);
+    fn getFinalCoord(&self, value: i32) -> i32;
 }
 
 #[allow(non_snake_case)]
@@ -43,56 +45,19 @@ impl Funct for State
             println!();
         }
     }
-}
 
-#[allow(non_snake_case)]
-fn      createFirstState(file: File) -> State
-{
-    let reader = BufReader::new(file);
-    let mut size: usize = 0;
-    let mut grid = vec![vec![0i32; 1]; 1];
-    let mut y = 0;
-
-    for line in reader.lines()
+    fn getFinalCoord(&self, value: i32) -> i32
     {
-        let line = line.unwrap();
-
-        if line.chars().next().unwrap() != '#'
+        for i in 0..usize::pow(self.size, 2)
         {
-            if size == 0 { size = line.parse::<usize>().unwrap(); grid = vec![vec![0i32; size]; size]; }
-            else
+            if self.finalGrid[i / self.size][i % self.size] == value
             {
-                let i = line.split_whitespace();
-                let mut x = 0;
-                for value in i
-                {
-                    grid[y][x] = value.parse::<i32>().unwrap();
-                    x += 1;
-                }
-                y += 1;
+                return i as i32;
             }
         }
+        return -1;
     }
-    return State { size: size, grid: grid, finalGrid: makeFinalGrid(size) };
 }
-
-/*
-#[allow(non_snake_case)]
-fn      isItDoable(firstState: State) -> i32
-{
-    let mut n = 9;
-    let mut j = 0;
-    let mut np = 0;
-    let mut copie = vec![0i32; i32::pow(firstState.size as i32, 2) as usize];
-
-    for i in 0..(i32::pow(firstState.size as i32, 2))
-    {
-        copie[i as usize] = firstState.grid[(i / firstState.size as i32) as usize][(i % firstState.size as i32) as usize];
-    }
-    np = i32::abs(n % firstState.size as i32 - j % firstState.size as i32) + i32::abs(n / firstState.size as i32 - j % firstState.size as i32);
-    return 1 & np;
-}
-*/
 
 #[allow(non_snake_case)]
 fn      makeFinalGrid(size: usize) -> Vec<Vec<i32>>
@@ -147,6 +112,75 @@ fn      makeFinalGrid(size: usize) -> Vec<Vec<i32>>
 }
 
 #[allow(non_snake_case)]
+fn      createFirstState(file: File) -> State
+{
+    let reader = BufReader::new(file);
+    let mut size: usize = 0;
+    let mut grid = vec![vec![0i32; 1]; 1];
+    let mut y = 0;
+
+    for line in reader.lines()
+    {
+        let line = line.unwrap();
+
+        if line.chars().next().unwrap() != '#'
+        {
+            if size == 0 { size = line.parse::<usize>().unwrap(); grid = vec![vec![0i32; size]; size]; }
+            else
+            {
+                let i = line.split_whitespace();
+                let mut x = 0;
+                for value in i
+                {
+                    grid[y][x] = value.parse::<i32>().unwrap();
+                    x += 1;
+                }
+                y += 1;
+            }
+        }
+    }
+    return State { size: size, grid: grid, finalGrid: makeFinalGrid(size) };
+}
+
+#[allow(non_snake_case)]
+fn      isItDoable(firstState: State) -> i32
+{
+    let n;
+    let mut j = -1;
+    let mut np;
+    let mut copie = vec![0i32; i32::pow(firstState.size as i32, 2) as usize];
+
+    for i in 0..(i32::pow(firstState.size as i32, 2))
+    {
+        copie[i as usize] = firstState.grid[(i / firstState.size as i32) as usize][(i % firstState.size as i32) as usize];
+        if copie[i as usize] == 0
+        {
+            j = i;
+        }
+    }
+    n = firstState.getFinalCoord(0);
+    np = i32::abs(n % firstState.size as i32 - j % firstState.size as i32) + i32::abs(n / firstState.size as i32 - j / firstState.size as i32);
+    for n in (1..i32::pow(firstState.size as i32, 2)).rev()
+    {
+        let test = firstState.getFinalCoord(copie[j as usize]);
+        if test != j
+        {
+            let tmp = copie[j as usize];
+
+            copie[j as usize] = copie[firstState.getFinalCoord(tmp) as usize];
+            copie[firstState.getFinalCoord(tmp) as usize] = tmp;
+            np += 1;
+        }
+        j = 0;
+        while copie[j as usize] != n
+        {
+            j += 1;
+        }
+    }
+    return 1 & np;
+}
+
+#[allow(non_snake_case)]
 fn      main() -> io::Result<()>
 {
     let args: Vec<String> = env::args().collect();
@@ -160,11 +194,7 @@ fn      main() -> io::Result<()>
 
         firstState = createFirstState(file);
         firstState.print();
-        println!();
-        for line in firstState.finalGrid
-        {
-            println!("{:?}", line);
-        }
+        println!("{}", isItDoable(firstState));
     }
     Ok(())
 }
