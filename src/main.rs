@@ -8,10 +8,12 @@ trait Funct
     fn print(&self);
 }
 
+#[allow(non_snake_case)]
 struct State
 {
     size: usize,
-    grid: Vec<Vec<i32>>
+    grid: Vec<Vec<i32>>,
+    finalGrid: Vec<Vec<i32>>
 }
 
 #[allow(non_snake_case)]
@@ -71,7 +73,77 @@ fn      createFirstState(file: File) -> State
             }
         }
     }
-    return State { size: size, grid: grid };
+    return State { size: size, grid: grid, finalGrid: makeFinalGrid(size) };
+}
+
+/*
+#[allow(non_snake_case)]
+fn      isItDoable(firstState: State) -> i32
+{
+    let mut n = 9;
+    let mut j = 0;
+    let mut np = 0;
+    let mut copie = vec![0i32; i32::pow(firstState.size as i32, 2) as usize];
+
+    for i in 0..(i32::pow(firstState.size as i32, 2))
+    {
+        copie[i as usize] = firstState.grid[(i / firstState.size as i32) as usize][(i % firstState.size as i32) as usize];
+    }
+    np = i32::abs(n % firstState.size as i32 - j % firstState.size as i32) + i32::abs(n / firstState.size as i32 - j % firstState.size as i32);
+    return 1 & np;
+}
+*/
+
+#[allow(non_snake_case)]
+fn      makeFinalGrid(size: usize) -> Vec<Vec<i32>>
+{
+    let mut grid = vec![vec![0i32; size]; size];
+    let end = usize::pow(size, 2);
+    let mut xMinMax = (0, size as i32 - 1);
+    let mut yMinMax = (0, size as i32 - 1);
+    let mut i = 0;
+    let mut x;
+    let mut y;
+
+    while i < end
+    {
+        x = xMinMax.0;
+        while x <= xMinMax.1 && i < end
+        {
+            i += 1;
+            grid[yMinMax.0 as usize][x as usize] = if i < end { i as i32 } else { 0 };
+            x += 1;
+        }
+        yMinMax.0 += 1;
+
+        y = yMinMax.0;
+        while y <= yMinMax.1 && i < end
+        {
+            i += 1;
+            grid[y as usize][xMinMax.1 as usize] = if i < end { i as i32 } else { 0 };
+            y += 1;
+        }
+        xMinMax.1 -= 1;
+
+        x = xMinMax.1;
+        while x >= xMinMax.0 && i < end
+        {
+            i += 1;
+            grid[yMinMax.1 as usize][x as usize] = if i == end { 0 } else { i as i32 };
+            x -= 1;
+        }
+        yMinMax.1 -= 1;
+
+        y = yMinMax.1;
+        while y >= yMinMax.0 && i < end
+        {
+            i += 1;
+            grid[y as usize][xMinMax.0 as usize] = if i == end { 0 } else { i as i32 };
+            y -= 1;
+        }
+        xMinMax.0 += 1;
+    }
+    return grid;
 }
 
 #[allow(non_snake_case)]
@@ -88,6 +160,11 @@ fn      main() -> io::Result<()>
 
         firstState = createFirstState(file);
         firstState.print();
+        println!();
+        for line in firstState.finalGrid
+        {
+            println!("{:?}", line);
+        }
     }
     Ok(())
 }
