@@ -136,8 +136,13 @@ fn      isItDoable(firstState: &State) -> i32
 #[allow(non_snake_case)]
 fn      resolve(firstState: &State)
 {
+    let mut test = firstState.swap('E');
     println!("Doable");
-    firstState.swap('E');
+    println!();
+    test.print();
+    test = firstState.swap('N');
+    println!();
+    test.print();
 }
 
 #[allow(non_snake_case)]

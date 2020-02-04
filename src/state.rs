@@ -49,7 +49,8 @@ impl State
 
     pub fn swap(&self, action: char) -> State
     {
-        let mut newState = self.clone();
+        let mut newGrid = self.grid.clone();
+        let mut newHole = self.hole.clone();
         let mut x = 0;
         let mut y = 0;
 
@@ -61,13 +62,11 @@ impl State
         {
             y = if action == 'S' { 1 } else { -1 };
         }
-        /*
-        newState.grid[self.hole.1 as usize][self.hole.0 as usize] = newState.grid[(self.hole.1 + y) as usize][(self.hole.0 + x) as usize];
-        newState.grid[(self.hole.1 + y) as usize][(self.hole.0 + x) as usize] = 0;
-        newState.hole.0 += x;
-        newState.hole.1 += y;
-        */
+        newGrid[self.hole.1 as usize][self.hole.0 as usize] = newGrid[(self.hole.1 + y) as usize][(self.hole.0 + x) as usize];
+        newGrid[(self.hole.1 + y) as usize][(self.hole.0 + x) as usize] = 0;
+        newHole.0 += x;
+        newHole.1 += y;
 
-        State { size: 0, grid: vec![vec![0i32; 4]; 4], hole: (-1, -1), finalGrid: vec![vec![0i32; 4]; 4] }
+        State { size: self.size, grid: newGrid, hole: newHole, finalGrid: self.finalGrid.clone() }
     }
 }
