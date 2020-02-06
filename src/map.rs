@@ -1,12 +1,12 @@
 #[derive(Debug)]
 pub struct Map
 {
-    width: usize,
-    height: usize,
-    grid: Vec<i32>, // ptr to array of i32
-    hole: usize,
-    heuristic_value: i32,
-    cost: i32// heuristic + chemins actuel
+    pub width: usize,
+    pub height: usize,
+    pub grid: Vec<i32>, // ptr to array of i32
+    pub hole: i32,
+    pub heuristic_value: i32,
+    pub cost: i32// heuristic + chemins actuel
 }
 
 impl Map
@@ -24,4 +24,6 @@ impl Map
             cost: -1
         }
     }
+
+    // new from_map ()
 }
