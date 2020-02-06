@@ -7,59 +7,7 @@ use std::vec::Vec;
 use state::State;
 
 #[allow(non_snake_case)]
-fn      makeFinalGrid(size: usize) -> Vec<Vec<i32>>
-{
-    let mut grid = vec![vec![0i32; size]; size];
-    let end = usize::pow(size, 2);
-    let mut xMinMax = (0, size as i32 - 1);
-    let mut yMinMax = (0, size as i32 - 1);
-    let mut i = 0;
-    let mut x;
-    let mut y;
-
-    while i < end
-    {
-        x = xMinMax.0;
-        while x <= xMinMax.1 && i < end
-        {
-            i += 1;
-            grid[yMinMax.0 as usize][x as usize] = if i < end { i as i32 } else { 0 };
-            x += 1;
-        }
-        yMinMax.0 += 1;
-
-        y = yMinMax.0;
-        while y <= yMinMax.1 && i < end
-        {
-            i += 1;
-            grid[y as usize][xMinMax.1 as usize] = if i < end { i as i32 } else { 0 };
-            y += 1;
-        }
-        xMinMax.1 -= 1;
-
-        x = xMinMax.1;
-        while x >= xMinMax.0 && i < end
-        {
-            i += 1;
-            grid[yMinMax.1 as usize][x as usize] = if i == end { 0 } else { i as i32 };
-            x -= 1;
-        }
-        yMinMax.1 -= 1;
-
-        y = yMinMax.1;
-        while y >= yMinMax.0 && i < end
-        {
-            i += 1;
-            grid[y as usize][xMinMax.0 as usize] = if i == end { 0 } else { i as i32 };
-            y -= 1;
-        }
-        xMinMax.0 += 1;
-    }
-    grid
-}
-
-#[allow(non_snake_case)]
-fn      createFirstState(file: File) -> State
+fn      createFirstState(firstState: &mut State, file: File)
 {
     let reader = BufReader::new(file);
     let mut size: usize = 0;
@@ -92,7 +40,7 @@ fn      createFirstState(file: File) -> State
             }
         }
     }
-    State { size: size, grid: grid, hole: hole, finalGrid: makeFinalGrid(size) }
+    firstState.init(size, grid);
 }
 
 #[allow(non_snake_case)]
@@ -136,13 +84,15 @@ fn      isItDoable(firstState: &State) -> i32
 #[allow(non_snake_case)]
 fn      resolve(firstState: &State)
 {
-    let mut test = firstState.swap('E');
-    println!("Doable");
-    println!();
-    test.print();
-    test = firstState.swap('N');
-    println!();
-    test.print();
+    let mut open: Vec<&State> = Vec::new();
+
+    open.push(firstState);
+    while open[0].heuristic > 0
+    {
+        open[0].swap('N').print();
+        break;
+    }
+    open.clear();
 }
 
 #[allow(non_snake_case)]
@@ -150,14 +100,14 @@ fn      main() -> io::Result<()>
 {
     let args: Vec<String> = env::args().collect();
     let file;
-    let firstState;
+    let mut firstState = State::new();
 
     if args.len() != 2 { println!("usage: cargo run [puzzle]"); }
     else
     {
         file = File::open(&args[1])?;
 
-        firstState = createFirstState(file);
+        createFirstState(&mut firstState, file);
         println!("First State:");
         firstState.print();
         if isItDoable(&firstState) == 0
