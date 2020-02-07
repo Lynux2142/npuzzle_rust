@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+#[derive(Clone, Eq, PartialEq)]
 #[derive(Debug)]
 pub struct Map
 {
@@ -5,7 +7,7 @@ pub struct Map
     pub width: usize,
     pub height: usize,
     pub grid: Vec<i32>, // ptr to array of i32
-    pub hole: i32,
+    pub hole: usize,
     pub heuristic_value: i32,
     pub cost: i32, // heuristic + chemins actuel
     pub shortest_path: String
@@ -22,7 +24,7 @@ impl Map
             height: 0,
             grid: Vec::new(),
             hole: 0,
-            heuristic_value: -1,
+            heuristic_value: i32::max_value(),
             cost: -1,
             shortest_path: String::new()
         }
@@ -50,5 +52,25 @@ impl Map
         }
     }
 
+    pub fn get_key(&self) -> String {
+        format!("{:?}", self.grid)
+    }
     // new from_map ()
 }
+
+impl Ord for Map {
+    fn cmp(&self, other: &Map) -> Ordering {
+        // Notice that the we flip the ordering on costs.
+        // In case of a tie we compare positions - this step is necessary
+        // to make implementations of `PartialEq` and `Ord` consistent.
+        other.heuristic_value.cmp(&self.heuristic_value)
+    }
+}
+
+// `PartialOrd` needs to be implemented as well.
+impl PartialOrd for Map {
+    fn partial_cmp(&self, other: &Map) -> Option<Ordering> {
+        Some(other.heuristic_value.cmp(&self.heuristic_value))
+    }
+}
+

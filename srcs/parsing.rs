@@ -84,7 +84,7 @@ pub fn      parse(map: & mut Map, file: File)
                     else
                     {
                         let tmp = set_values(&mut map.grid, map.width, y, line.split_whitespace());
-                        if tmp != -1i32 { map.hole = tmp; }
+                        if tmp != -1i32 { map.hole = tmp as usize; }
                         y += 1;
                     }
                 }

@@ -2,6 +2,11 @@ use std::collections::HashMap;
 
 use map::Map;
 
+enum sign {
+    POSITIF,
+    NEGATIF
+}
+
 // trouver un meilleur moyen de lui filer les heuristics
 // pour etre un peu plus modulaire
 use heuristics::manhatan_distance;
@@ -33,10 +38,20 @@ fn get_index(grid: &Vec<i32>, to_search: i32) -> Option<usize> {
     None
 }
 
-fn swap(to_swap_map: &mut Vec<i32>, hole_index: &i32, index_diff: &i32)  {
-    let tmp = to_swap_map[(hole_index + index_diff) as usize];
-    to_swap_map[*hole_index as usize] = tmp;
-    to_swap_map[(hole_index + index_diff) as usize] = 0; // hole
+fn swap(to_swap_map: &mut Vec<i32>, hole_index: &usize, index_diff: &usize, sign: sign)  {
+    match sign {
+        sign::POSITIF => {
+            let tmp = to_swap_map[(hole_index + index_diff)];
+            to_swap_map[*hole_index] = tmp;
+            to_swap_map[(hole_index + index_diff)] = 0; // hole
+
+        },
+        sign::NEGATIF => {
+            let tmp = to_swap_map[(hole_index - index_diff)];
+            to_swap_map[*hole_index] = tmp;
+            to_swap_map[(hole_index - index_diff)] = 0; // hole
+        }
+    }
 }
 
 // take a ref to a map struct and a direction
@@ -61,19 +76,23 @@ pub fn core_swap(current_map: & Map, goal_map: & HashMap<i32, i32>, direction: c
     {
         'l' | 'L' => {
             // left
-            swap(&mut new_grid, &current_map.hole, &-1)
+            swap(&mut new_grid, &current_map.hole, &1, sign::NEGATIF);
+            new_map.hole -= 1;
         },
         'u' | 'U' => {
             // up
-            swap(&mut new_grid, &current_map.hole, &-(current_map.width as i32))
+            swap(&mut new_grid, &current_map.hole, &(current_map.width), sign::NEGATIF);
+            new_map.hole -= current_map.width;
         },
         'r' | 'R' => {
             // right
-            swap(&mut new_grid, &current_map.hole, &1)
+            swap(&mut new_grid, &current_map.hole, &1, sign::POSITIF);
+            new_map.hole += 1;
         },
         'd' | 'D' => {
             // down
-            swap(&mut new_grid, &current_map.hole, &(current_map.width as i32))
+            swap(&mut new_grid, &current_map.hole, &current_map.width, sign::POSITIF);
+            new_map.hole += current_map.width;
         },
         _ => {
             panic!("Wrong letters");
