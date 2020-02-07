@@ -4,22 +4,54 @@ use map::*;
 
 fn          get_size(width: &mut usize, height: &mut usize, line: String)
 {
-    let size;
+    let values = line.split(" ").collect::<Vec<&str>>();
 
-    size = match line.parse::<usize>()
+    match values.len()
     {
-        Ok(size) =>
+        1 =>
         {
-            size
+            let size = match values[0].parse::<usize>()
+            {
+                Ok(size) => { size },
+                Err(e) => panic!("error: {}", e)
+            };
+            *width = size;
+            *height = size;
         },
-        Err(e) => panic!("error: {}", e)
-    };
-    *width = size;
-    *height = size;
+        2 =>
+        {
+            let size = match values[0].parse::<usize>()
+            {
+                Ok(size) => { size },
+                Err(e) => panic!("error: {}", e)
+            };
+            *width = size;
+            let size = match values[1].parse::<usize>()
+            {
+                Ok(size) => { size },
+                Err(e) => panic!("error: {}", e)
+            };
+            *height = size;
+        }
+        _ => panic!("error")
+    }
+    /*
+       size = match line.parse::<usize>()
+       {
+       Ok(size) =>
+       {
+       size
+       },
+       Err(e) => panic!("error: {}", e)
+       };
+     *width = size;
+     *height = size;
+     */
 }
 
-fn          set_values(grid: &mut Vec<i32>, width: usize, y: usize, values: std::str::SplitWhitespace)
+fn          set_values(grid: &mut Vec<i32>, width: usize, y: usize, values: std::str::SplitWhitespace) -> i32
 {
+    let mut hole = -1i32;
     let mut x = 0usize;
 
     for value in values
@@ -30,17 +62,16 @@ fn          set_values(grid: &mut Vec<i32>, width: usize, y: usize, values: std:
             Err(e) => panic!("error: {}", e)
         };
         grid[y * width + x] = tmp;
+        if tmp == 0 { hole = (y * width + x) as i32; }
         x += 1;
     }
+    hole
 }
 
 pub fn      parse(map: & mut Map, file: File)
 {
     let reader = BufReader::new(file);
-    let mut width = 0usize;
-    let mut height = 0usize;
     let mut y = 0usize;
-    let mut grid: Vec<i32> = Vec::new();
 
     for line in reader.lines()
     {
@@ -56,15 +87,16 @@ pub fn      parse(map: & mut Map, file: File)
             {
                 if is_com != '#'
                 {
-                    if width == 0usize
+                    if map.width == 0usize
                     {
-                        get_size(&mut width, &mut height, line);
-                        grid.resize(width * height, 0);
-                        println!("width: {} - height: {}", width, height);
+                        get_size(&mut map.width, &mut map.height, line);
+                        map.grid.resize(map.width * map.height, 0);
+                        println!("width: {} - height: {}", map.width, map.height);
                     }
                     else
                     {
-                        set_values(&mut grid, width, y, line.split_whitespace());
+                        let tmp = set_values(&mut map.grid, map.width, y, line.split_whitespace());
+                        if tmp != -1i32 { map.hole = tmp; }
                         y += 1;
                     }
                 }
@@ -72,8 +104,5 @@ pub fn      parse(map: & mut Map, file: File)
             None => break,
         }
     }
-    map.size = width * height;
-    map.width = width;
-    map.height = height;
-    map.grid = grid.clone()
+    map.size = map.width * map.height;
 }
