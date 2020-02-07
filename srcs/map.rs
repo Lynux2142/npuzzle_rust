@@ -63,14 +63,14 @@ impl Ord for Map {
         // Notice that the we flip the ordering on costs.
         // In case of a tie we compare positions - this step is necessary
         // to make implementations of `PartialEq` and `Ord` consistent.
-        other.heuristic_value.cmp(&self.heuristic_value)
+        other.cost.cmp(&self.cost)
     }
 }
 
 // `PartialOrd` needs to be implemented as well.
 impl PartialOrd for Map {
     fn partial_cmp(&self, other: &Map) -> Option<Ordering> {
-        Some(other.heuristic_value.cmp(&self.heuristic_value))
+        Some(other.cost.cmp(&self.cost))
     }
 }
 

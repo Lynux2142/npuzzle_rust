@@ -101,5 +101,6 @@ pub fn core_swap(current_map: & Map, goal_map: & HashMap<i32, i32>, direction: c
         }
     };
     new_map.heuristic_value = manhatan_distance(&new_map, goal_map);
+    new_map.cost = new_map.shortest_path.len() as i32 + new_map.heuristic_value;
     new_map
 }
