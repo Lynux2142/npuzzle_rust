@@ -29,21 +29,21 @@ impl Map
 
     pub fn print(&self)
     {
-        let mut holeSize = 0;
-        let mut valueSize;
+        let mut hole_size = 0;
+        let mut value_size;
         let mut tmp = (self.size) as i32;
 
-        while tmp >= 10 { holeSize += 1; tmp /= 10; }
+        while tmp >= 10 { hole_size += 1; tmp /= 10; }
 
         for i in 0..self.size
         {
-            valueSize = 0;
+            value_size = 0;
             if self.grid[i] != 0
             {
                 tmp = self.grid[i];
-                while tmp >= 10 { valueSize += 1; tmp /= 10; }
+                while tmp >= 10 { value_size += 1; tmp /= 10; }
             }
-            for _ in valueSize..holeSize { print!(" "); }
+            for _ in value_size..hole_size { print!(" "); }
             print!("{}", self.grid[i]);
             if (i + 1) % self.width != 0 { print!(" "); } else { println!(); }
         }
