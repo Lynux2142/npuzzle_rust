@@ -12,23 +12,6 @@ enum sign {
 use heuristics::manhatan_distance;
 
 #[allow(dead_code)]
-pub fn      make_final_grid() -> HashMap<i32, i32>
-{
-    let mut final_grid = HashMap::new();
-    final_grid.insert(0, 4);
-    final_grid.insert(1, 0);
-    final_grid.insert(2, 1);
-    final_grid.insert(3, 2);
-    final_grid.insert(4, 5);
-    final_grid.insert(5, 8);
-    final_grid.insert(6, 7);
-    final_grid.insert(7, 6);
-    final_grid.insert(8, 3);
-    final_grid
-//    vec![1,2,3,8,0,4,7,6,5]
-}
-
-#[allow(dead_code)]
 fn get_index(grid: &Vec<i32>, to_search: i32) -> Option<usize> {
     for i in 0..grid.len() {
         if grid[i] == to_search {

@@ -26,9 +26,6 @@ pub fn manhatan_distance(current_map: & Map, goal_map: & HashMap<i32, i32>) -> i
     let mut distance = 0;
     let mut index = 0;
     for x in current_map.grid.iter() {
-        println!("x : {}", x);
-        println!("map : {:?}", current_map);
-        println!("goal_map : {:?}", goal_map);
         let goal_val = goal_map[&x];
         let x_diff = (goal_val % current_map.width as i32)
             - (index % current_map.width) as i32;

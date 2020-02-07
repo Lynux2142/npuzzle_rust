@@ -7,7 +7,7 @@ mod make_final_grid;
 use std::collections::BinaryHeap;
 use std::collections::HashMap;
 
-use map_procedure::{core_swap, make_final_grid};
+use map_procedure::{core_swap};
 use map::*;
 use parsing::*;
 use make_final_grid::*;
@@ -125,7 +125,7 @@ fn      main()
 
 
     // algo
-    let final_grid = make_final_grid();
+    let final_grid = make_final_grid(map.width as i32, map.height as i32);
     // expand tous les enfants ?
     expand(&map, &final_grid);
 
