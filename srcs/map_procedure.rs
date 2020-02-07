@@ -52,6 +52,10 @@ pub fn core_swap(current_map: & Map, goal_map: & HashMap<i32, i32>, direction: c
     new_map.cost = current_map.cost;
     new_map.grid = current_map.grid.clone();
 
+    // shortest path
+    new_map.shortest_path = current_map.shortest_path.clone();
+    new_map.shortest_path.push(direction);
+
     let mut new_grid = &mut new_map.grid;
     match direction
     {

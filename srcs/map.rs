@@ -7,7 +7,8 @@ pub struct Map
     pub grid: Vec<i32>, // ptr to array of i32
     pub hole: i32,
     pub heuristic_value: i32,
-    pub cost: i32// heuristic + chemins actuel
+    pub cost: i32, // heuristic + chemins actuel
+    pub shortest_path: String
 }
 
 impl Map
@@ -16,14 +17,14 @@ impl Map
     {
         Map
         {
-            // comment on fait pour gerer les usize, on laisse a 0 ?
             size: 0,
             width: 0,
             height: 0,
             grid: Vec::new(),
             hole: 0,
             heuristic_value: -1,
-            cost: -1
+            cost: -1,
+            shortest_path: String::new()
         }
     }
 
