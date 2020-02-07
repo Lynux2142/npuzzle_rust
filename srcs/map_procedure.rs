@@ -1,55 +1,26 @@
+use std::collections::HashMap;
+
 use map::Map;
 
+// trouver un meilleur moyen de lui filer les heuristics
+// pour etre un peu plus modulaire
+use heuristics::manhatan_distance;
+
 #[allow(dead_code)]
-fn      make_final_grid(size: usize) -> Vec<Vec<i32>>
+pub fn      make_final_grid() -> HashMap<i32, i32>
 {
-    let mut grid = vec![vec![0i32; size]; size];
-    let end = usize::pow(size, 2);
-    let mut x_min_max = (0, size as i32 - 1);
-    let mut y_min_max = (0, size as i32 - 1);
-    let mut i = 0;
-    let mut x;
-    let mut y;
-
-    while i < end
-    {
-        x = x_min_max.0;
-        while x <= x_min_max.1 && i < end
-        {
-            i += 1;
-            grid[y_min_max.0 as usize][x as usize] = if i < end { i as i32 } else { 0 };
-            x += 1;
-        }
-        y_min_max.0 += 1;
-
-        y = y_min_max.0;
-        while y <= y_min_max.1 && i < end
-        {
-            i += 1;
-            grid[y as usize][x_min_max.1 as usize] = if i < end { i as i32 } else { 0 };
-            y += 1;
-        }
-        x_min_max.1 -= 1;
-
-        x = x_min_max.1;
-        while x >= x_min_max.0 && i < end
-        {
-            i += 1;
-            grid[y_min_max.1 as usize][x as usize] = if i == end { 0 } else { i as i32 };
-            x -= 1;
-        }
-        y_min_max.1 -= 1;
-
-        y = y_min_max.1;
-        while y >= y_min_max.0 && i < end
-        {
-            i += 1;
-            grid[y as usize][x_min_max.0 as usize] = if i == end { 0 } else { i as i32 };
-            y -= 1;
-        }
-        x_min_max.0 += 1;
-    }
-    grid
+    let mut final_grid = HashMap::new();
+    final_grid.insert(0, 4);
+    final_grid.insert(1, 0);
+    final_grid.insert(2, 1);
+    final_grid.insert(3, 2);
+    final_grid.insert(4, 5);
+    final_grid.insert(5, 8);
+    final_grid.insert(6, 7);
+    final_grid.insert(7, 6);
+    final_grid.insert(8, 3);
+    final_grid
+//    vec![1,2,3,8,0,4,7,6,5]
 }
 
 #[allow(dead_code)]
@@ -70,10 +41,17 @@ fn swap(to_swap_map: &mut Vec<i32>, hole_index: &i32, index_diff: &i32)  {
 
 // take a ref to a map struct and a direction
 // generate another map state from this
-pub fn core_swap(current_map: & Map, direction: char) -> Map {
-    println!("debut : {:?}", current_map);
+pub fn core_swap(current_map: & Map, goal_map: & HashMap<i32, i32>, direction: char) -> Map {
     let mut new_map = Map::new();
+    // init new_map, a voir pour implementer le Trait clone
+    new_map.size = current_map.size;
+    new_map.width = current_map.width;
+    new_map.height = current_map.height;
+    new_map.hole = current_map.hole;
+    new_map.heuristic_value = current_map.heuristic_value;
+    new_map.cost = current_map.cost;
     new_map.grid = current_map.grid.clone();
+
     let mut new_grid = &mut new_map.grid;
     match direction
     {
@@ -99,20 +77,6 @@ pub fn core_swap(current_map: & Map, direction: char) -> Map {
             // pas sense envoye une mauvaise lettre ...
         }
     };
-
-    println!("voici la new_map : {:?}", new_map);
-    Map::new()
+    new_map.heuristic_value = manhatan_distance(&new_map, goal_map);
+    new_map
 }
-/*
-fn main() {
-    let mut test = Map::new();
-
-    test.width = 3;
-    test.height = 3;
-
-    test.grid = vec![5,6,7,1,0,3,4,2,8];
-    test.hole = 4;
-
-    println!("test : {:?}", test);
-    core_swap(&test, 'r');
-}*/

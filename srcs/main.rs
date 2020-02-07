@@ -1,8 +1,9 @@
 mod parsing;
 mod map;
 mod map_procedure;
+mod heuristics;
 
-use map_procedure::core_swap;
+use map_procedure::{core_swap, make_final_grid};
 use map::*;
 use parsing::*;
 
@@ -21,13 +22,8 @@ fn      main()
     };
 
     parse(&mut map, file);
+    let final_grid = make_final_grid();
 
-
-    core_swap(&map, 'd');
+    core_swap(&map, &final_grid, 'd');
     println!("test : {:?}", map);
-    /*for i in 0..map.size
-    {
-        print!("{} ", map.grid[i]);
-    }
-    println!();*/
 }
