@@ -19,7 +19,7 @@ use map::Map;
 // mahnatan distance : 18
 
 
-pub fn manhatan_distance(current_map: & Map, goal_map: & HashMap<i32, i32>) -> u32 {
+pub fn manhatan_distance(current_map: & Map, goal_map: & HashMap<i32, i32>) -> i32 {
 
     // calcul index x
     // calcul index y
@@ -36,5 +36,5 @@ pub fn manhatan_distance(current_map: & Map, goal_map: & HashMap<i32, i32>) -> u
         distance += y_diff.abs();
         index += 1;
     }
-    distance as u32
+    distance
 }

@@ -35,18 +35,6 @@ fn          get_size(width: &mut usize, height: &mut usize, line: String)
         }
         _ => panic!("error")
     }
-    /*
-       size = match line.parse::<usize>()
-       {
-       Ok(size) =>
-       {
-       size
-       },
-       Err(e) => panic!("error: {}", e)
-       };
-     *width = size;
-     *height = size;
-     */
 }
 
 fn          set_values(grid: &mut Vec<i32>, width: usize, y: usize, values: std::str::SplitWhitespace) -> i32

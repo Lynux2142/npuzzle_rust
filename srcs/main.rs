@@ -2,10 +2,12 @@ mod parsing;
 mod map;
 mod map_procedure;
 mod heuristics;
+mod make_final_grid;
 
 use map_procedure::{core_swap, make_final_grid};
 use map::*;
 use parsing::*;
+use make_final_grid::*;
 
 use std::env;
 use std::fs::File;
@@ -25,5 +27,6 @@ fn      main()
     let final_grid = make_final_grid();
 
     core_swap(&map, &final_grid, 'd');
+    map.print();
     println!("test : {:?}", map);
 }
