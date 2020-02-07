@@ -27,5 +27,27 @@ impl Map
         }
     }
 
+    pub fn print(&self)
+    {
+        let mut holeSize = 0;
+        let mut valueSize;
+        let mut tmp = (self.size) as i32;
+
+        while tmp >= 10 { holeSize += 1; tmp /= 10; }
+
+        for i in 0..self.size
+        {
+            valueSize = 0;
+            if self.grid[i] != 0
+            {
+                tmp = self.grid[i];
+                while tmp >= 10 { valueSize += 1; tmp /= 10; }
+            }
+            for _ in valueSize..holeSize { print!(" "); }
+            print!("{}", self.grid[i]);
+            if (i + 1) % self.width != 0 { print!(" "); } else { println!(); }
+        }
+    }
+
     // new from_map ()
 }

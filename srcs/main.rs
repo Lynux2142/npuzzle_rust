@@ -25,6 +25,7 @@ fn      main()
     parse(&mut map, file);
 
 
+    map.print();
     core_swap(&map, 'd');
     println!("test : {:?}", map);
     /*for i in 0..map.size
