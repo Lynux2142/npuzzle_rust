@@ -1,10 +1,12 @@
 mod parsing;
 mod map;
 mod map_procedure;
+mod make_final_grid;
 
 use map_procedure::core_swap;
 use map::*;
 use parsing::*;
+use make_final_grid::*;
 
 use std::env;
 use std::fs::File;
