@@ -2,7 +2,7 @@ use std::io::{BufRead, BufReader};
 use std::fs::File;
 use map::*;
 
-fn          get_size(width: &mut usize, height: &mut usize, line: String)
+fn      get_size(width: &mut usize, height: &mut usize, line: String)
 {
     let values = line.split(" ").collect::<Vec<&str>>();
 
@@ -37,7 +37,7 @@ fn          get_size(width: &mut usize, height: &mut usize, line: String)
     }
 }
 
-fn          set_values(grid: &mut Vec<i32>, width: usize, y: usize, values: std::str::SplitWhitespace) -> i32
+fn      set_values(grid: &mut Vec<i32>, width: usize, y: usize, values: std::str::SplitWhitespace) -> i32
 {
     let mut hole = -1i32;
     let mut x = 0usize;
@@ -56,7 +56,7 @@ fn          set_values(grid: &mut Vec<i32>, width: usize, y: usize, values: std:
     hole
 }
 
-pub fn      parse(map: & mut Map, file: File)
+pub fn  parse(map: & mut Map, file: File)
 {
     let reader = BufReader::new(file);
     let mut y = 0usize;
@@ -79,7 +79,6 @@ pub fn      parse(map: & mut Map, file: File)
                     {
                         get_size(&mut map.width, &mut map.height, line);
                         map.grid.resize(map.width * map.height, 0);
-                        println!("width: {} - height: {}", map.width, map.height);
                     }
                     else
                     {

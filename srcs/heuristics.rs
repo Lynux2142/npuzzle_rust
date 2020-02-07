@@ -18,21 +18,20 @@ use map::Map;
 
 // mahnatan distance : 18
 
-
-pub fn manhatan_distance(current_map: & Map, goal_map: & HashMap<i32, i32>) -> i32 {
-
+pub fn manhatan_distance(current_map: &Map, goal_map: &HashMap<i32, i32>) -> i32
+{
     // calcul index x
     // calcul index y
     let mut distance = 0;
     let mut index = 0;
-    for x in current_map.grid.iter() {
+    for x in current_map.grid.iter()
+    {
         let goal_val = goal_map[&x];
         let x_diff = (goal_val % current_map.width as i32)
             - (index % current_map.width) as i32;
         let y_diff = (goal_val / current_map.width as i32)
             - (index / current_map.width) as i32;
-        distance += x_diff.abs();
-        distance += y_diff.abs();
+        distance += x_diff.abs() + y_diff.abs();
         index += 1;
     }
     distance
