@@ -1,6 +1,0 @@
-- toutes les valeurs sont la
-- check qu'il y ait une taille (plus que 2 chiffres error)
-- voir quand pas de taille
-- check les lignes vides
-- check les dimension de la grille par rapport au size donne
-- check que les chiffres soient valides
