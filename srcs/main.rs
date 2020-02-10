@@ -85,25 +85,35 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
     }
 }
 
-fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &HeuristicType, algo_char: char) -> Map {
+fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &HeuristicType, algo_char: char) -> (u32, u32, Map) {
     let mut open = BinaryHeap::new();
     let mut close : HashMap<String, Map> = HashMap::new();
     let mut current = initial_state.clone();
+    let mut time_complexity: u32 = 1;
+    let mut size_complexity: u32 = 0;
 
     while current.heuristic_value > 0
     {
+        print!("\rtime complexity : {}", time_complexity);
         generate_child(&current, &mut open, &close, goal_map, heuristic_func, algo_char);
+        if open.len() as u32 > size_complexity {
+            size_complexity = open.len() as u32;
+        }
         //   appel les 4 fonctions swap
         //   pour chaque return :
         //       Regarer si deja explorer, si non push dans opens
         //       sinon verifier que le chemins ne soit pas plus court
         close.insert(current.get_key(), current.clone());
         current = match open.pop() {
-            Some(tmp) => tmp,
+            Some(tmp) => {
+                time_complexity += 1;
+                tmp
+            },
             None => break
         };
     }
-    current
+    println!();
+    (size_complexity, time_complexity, current)
 }
 
 fn ask_algorithm() -> char
@@ -251,12 +261,14 @@ fn  main()
     // algo
     let final_grid = make_final_grid(map.width as i32, map.height as i32);
     // expand tous les enfants ?
-    let mut final_state = Map::new();
+    let mut final_state = (0, 0, Map::new());
     if is_doable(&map, &final_grid) == 0
     {
         final_state = expand(&map, &final_grid, &heuristic_func, algo_char);
     }
     else { println!("undoable"); }
     println!();
-    test_solution(&map, &final_state, is_manual);
+    test_solution(&map, &final_state.2, is_manual);
+    println!("time_complexity : {}", final_state.1);
+    println!("size_complexity : {}", final_state.0);
 }
