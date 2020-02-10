@@ -22,8 +22,8 @@ use std::io::{stdin, stdout, Write};
 type HeuristicType = fn(&Map, &HashMap<i32, i32>) -> i32;
 
 fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
-                  close: &HashMap<String, Map>, goal_map: &HashMap<i32, i32>,
-                  heuristic_func: &HeuristicType)
+                   close: &HashMap<String, Map>, goal_map: &HashMap<i32, i32>,
+                   heuristic_func: &HeuristicType)
 {
     for i in "LURD".chars()
     {
@@ -77,7 +77,7 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                 {
                     // already explored
                     // go udpate
-             //       println!("oulbiez pas de faire le update !!!!");
+                    //       println!("oulbiez pas de faire le update !!!!");
                 } else { open.push(new_map); }
             },
             None => {continue;}
@@ -137,12 +137,11 @@ fn ask_heuristic() -> HeuristicType
     }
 }
 
-fn  test_solution(initial_map: &Map, final_map: &Map)
+fn  test_solution(initial_map: &Map, final_map: &Map, is_manual: bool)
 {
     let mut copy_state = initial_map.clone();
 
     for hole_move in final_map.shortest_path.chars()
-    for hole_move in test.chars()
     {
         match hole_move
         {
@@ -174,9 +173,12 @@ fn  test_solution(initial_map: &Map, final_map: &Map)
         }
         copy_state.print();
         println!();
-        let mut s = String::new();
-        let _ = stdout().flush();
-        stdin().read_line(&mut s).expect("");
+        if is_manual {
+            let mut s = String::new();
+            let _ = stdout().flush();
+            stdin().read_line(&mut s).expect("");
+
+        }
     }
     println!("End in {} moves: {}", final_map.shortest_path.len(), final_map.shortest_path);
 }
@@ -184,7 +186,14 @@ fn  test_solution(initial_map: &Map, final_map: &Map)
 fn  main()
 {
     let args: Vec<String> = env::args().collect();
-    if args.len() != 2 { println!("usage: ./npuzzle [puzzle]"); exit(0); }
+    let mut is_manual = false;
+    if args.len() == 3 {
+        if !(args[2] == "--manual") {
+            println!("usage: ./npuzzle puzzle [--manual]\n\t--manual : print states step by step");
+        }
+        else {is_manual = true;}
+    }
+    if args.len() != 2 && args.len() != 3 {println!("usage: ./npuzzle puzzle [--manual]\n\t--manual : print states step by step"); exit(0);}
     let mut map: Map = Map::new();
     let file = match File::open(&args[1])
     {
@@ -209,5 +218,5 @@ fn  main()
     }
     else { println!("undoable"); }
     println!();
-    test_solution(&map, &final_state);
+    test_solution(&map, &final_state, is_manual);
 }
