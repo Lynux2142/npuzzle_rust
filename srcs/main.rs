@@ -66,7 +66,7 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                 }
                 else { None }
             },
-            _ => { panic!("Wrong letters") }
+            _ => panic!("Wrong letters")
         };
         match new_map
         {
@@ -214,7 +214,8 @@ fn  test_solution(initial_map: &Map, final_map: &Map, is_manual: bool)
                 copy_state.grid[copy_state.hole + 1] = 0;
                 copy_state.hole += 1;
             }
-            _ => panic!("stop, something wrong.")
+            _ => panic!("Wrong letters.")
+
         }
         copy_state.print();
         println!();
@@ -243,7 +244,10 @@ fn  main()
     let file = match File::open(&args[1])
     {
         Ok(file) => file,
-        Err(e) => panic!("error: {}", e.description())
+        Err(e) => {
+            println!("error : {}", e.description());
+            exit(1);
+        }
     };
 
     let algo_char = ask_algorithm();

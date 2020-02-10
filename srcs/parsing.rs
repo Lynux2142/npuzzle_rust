@@ -1,6 +1,7 @@
 use std::io::{BufRead, BufReader};
 use std::fs::File;
 use crate::map::*;
+use std::process::exit;
 
 fn      get_size(width: &mut usize, height: &mut usize, line: String)
 {
@@ -13,7 +14,10 @@ fn      get_size(width: &mut usize, height: &mut usize, line: String)
             let size = match values[0].parse::<usize>()
             {
                 Ok(size) => { size },
-                Err(e) => panic!("error: {}", e)
+                Err(e) => {
+                    println!("error: {}", e);
+                    exit(1);
+                }
             };
             *width = size;
             *height = size;
@@ -23,17 +27,26 @@ fn      get_size(width: &mut usize, height: &mut usize, line: String)
             let size = match values[0].parse::<usize>()
             {
                 Ok(size) => { size },
-                Err(e) => panic!("error: {}", e)
+                Err(e) => {
+                    println!("error: {}", e);
+                    exit(1);
+                }
             };
             *width = size;
             let size = match values[1].parse::<usize>()
             {
                 Ok(size) => { size },
-                Err(e) => panic!("error: {}", e)
+                Err(e) => {
+                    println!("error: {}", e);
+                    exit(1);
+                }
             };
             *height = size;
         }
-        _ => panic!("error")
+        _ => {
+            println!("error");
+            exit(4);
+        }
     }
 }
 
@@ -47,7 +60,10 @@ fn      set_values(grid: &mut Vec<i32>, width: usize, y: usize, values: std::str
         let tmp = match value.parse::<i32>()
         {
             Ok(tmp) => tmp,
-            Err(e) => panic!("error: {}", e)
+            Err(e) => {
+                println!("error: {}", e);
+                exit(1);
+            }
         };
         grid[y * width + x] = tmp;
         if tmp == 0 { hole = (y * width + x) as i32; }
@@ -66,7 +82,10 @@ pub fn  parse(map: & mut Map, file: File)
         let line = match line
         {
             Ok(line) => line,
-            Err(e) => panic!("error: {}", e)
+            Err(e) => {
+                println!("error: {}", e);
+                exit(1);
+            }
         };
 
         match line.chars().next()
