@@ -11,7 +11,7 @@ pub struct Map
     pub hole: usize,
     pub heuristic_value: i32,
     pub cost: i32, // heuristic + chemins actuel
-    pub shortest_path: String
+    pub shortest_path: String,
 }
 
 impl Map

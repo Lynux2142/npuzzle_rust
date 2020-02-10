@@ -48,7 +48,7 @@ fn swap(to_swap_map: &mut Vec<i32>, hole_index: &usize, index_diff: &usize, sign
 // take a ref to a map struct and a direction
 // generate another map state from this
 pub fn core_swap(current_map: &Map, goal_map: &HashMap<i32, i32>, direction: char,
-                 heuristic_func: &HeuristicType) -> Map
+                 heuristic_func: &HeuristicType, algo_char: char) -> Map
 {
     let mut new_map = current_map.clone();
     // init new_map, a voir pour implementer le Trait clone
@@ -89,6 +89,12 @@ pub fn core_swap(current_map: &Map, goal_map: &HashMap<i32, i32>, direction: cha
     };
 //    new_map.heuristic_value = manhatan_distance(&new_map, goal_map);
     new_map.heuristic_value = heuristic_func(&new_map, goal_map);
-    new_map.cost = new_map.shortest_path.len() as i32 + new_map.heuristic_value;
+    if algo_char == 'a' {
+        new_map.cost = new_map.shortest_path.len() as i32 + new_map.heuristic_value;
+    } else if algo_char == 'b' {
+        new_map.cost = new_map.heuristic_value;
+    } else {
+        new_map.cost = new_map.shortest_path.len() as i32;
+    }
     new_map
 }

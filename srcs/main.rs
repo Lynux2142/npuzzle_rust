@@ -23,7 +23,7 @@ type HeuristicType = fn(&Map, &HashMap<i32, i32>) -> i32;
 
 fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                    close: &HashMap<String, Map>, goal_map: &HashMap<i32, i32>,
-                   heuristic_func: &HeuristicType)
+                   heuristic_func: &HeuristicType, algo_char: char)
 {
     for i in "LURD".chars()
     {
@@ -35,7 +35,7 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                 // left
                 if current_state.hole % current_state.width > 0
                 {
-                    Some(core_swap(current_state, goal_map, i, heuristic_func))
+                    Some(core_swap(current_state, goal_map, i, heuristic_func, algo_char))
                 }
                 else { None }
             },
@@ -44,7 +44,7 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                 // uo
                 if current_state.hole / current_state.width > 0
                 {
-                    Some(core_swap(current_state, goal_map, i, heuristic_func))
+                    Some(core_swap(current_state, goal_map, i, heuristic_func, algo_char))
                 }
                 else { None }
             },
@@ -53,7 +53,7 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                 // right
                 if current_state.hole % current_state.width < current_state.width - 1
                 {
-                    Some(core_swap(current_state, goal_map, i, heuristic_func))
+                    Some(core_swap(current_state, goal_map, i, heuristic_func, algo_char))
                 }
                 else { None }
             },
@@ -62,7 +62,7 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                 // down
                 if current_state.hole / current_state.width < current_state.height - 1
                 {
-                    Some(core_swap(current_state, goal_map, i, heuristic_func))
+                    Some(core_swap(current_state, goal_map, i, heuristic_func, algo_char))
                 }
                 else { None }
             },
@@ -85,14 +85,14 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
     }
 }
 
-fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &HeuristicType) -> Map {
+fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &HeuristicType, algo_char: char) -> Map {
     let mut open = BinaryHeap::new();
     let mut close : HashMap<String, Map> = HashMap::new();
     let mut current = initial_state.clone();
 
     while current.heuristic_value > 0
     {
-        generate_child(&current, &mut open, &close, goal_map, heuristic_func);
+        generate_child(&current, &mut open, &close, goal_map, heuristic_func, algo_char);
         //   appel les 4 fonctions swap
         //   pour chaque return :
         //       Regarer si deja explorer, si non push dans opens
@@ -106,11 +106,42 @@ fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &H
     current
 }
 
+fn ask_algorithm() -> char
+{
+    // a -> normal
+    // b -> greedy
+    // b -> uniform
+    let mut s = String::new();
+    println!("Please choose a caracter between a and c in order to choose your algorithm : ");
+    println!("- a : A * ( Default alogrithm )");
+    println!("- b : greedy cost");
+    println!("- c : uniform cost");
+    loop
+    {
+        print!("$> ");
+        let _ = stdout().flush();
+        s.clear();
+        stdin().read_line(&mut s).expect("Did not enter a correct string");
+        let cur_char = s.chars().next().unwrap();
+        if s.len() == 2
+        {
+            if cur_char == 'a' || cur_char == 'b' || cur_char == 'c'
+            {
+                return cur_char;
+            }
+        }
+        else if cur_char == '\n' {
+            return 'a';
+        }
+        println!("choose a caracter between a and c");
+    }
+}
+
 fn ask_heuristic() -> HeuristicType
 {
     let mut s = String::new();
-    println!("Veuillez selectionner un nombre entre 1 et 3 pour choisir votre heuristcs : ");
-    println!("- 1 : Manhattan Distance");
+    println!("Please choose a number between 1 and 3 in order to choose your heuristic : ");
+    println!("- 1 : Manhattan Distance ( Default Heuristic )");
     println!("- 2 : Euclidean Distance");
     println!("- 3 : Misplaced Tiles");
     loop
@@ -119,9 +150,9 @@ fn ask_heuristic() -> HeuristicType
         let _ = stdout().flush();
         s.clear();
         stdin().read_line(&mut s).expect("Did not enter a correct string");
+        let cur_char = s.chars().next().unwrap();
         if s.len() == 2
         {
-            let cur_char = s.chars().next().unwrap();
             if cur_char == '1' || cur_char == '2' || cur_char == '3'
             {
                 if cur_char == '1' {
@@ -133,8 +164,12 @@ fn ask_heuristic() -> HeuristicType
                 //return cur_char
             }
         }
-        println!("Veuillez entrer un chiffre entre 1 et 3");
+        else if cur_char == '\n' {
+            return heuristics::manhatan_distance;
+        }
+        println!("Enter a valid number between 1 and 3");
     }
+
 }
 
 fn  test_solution(initial_map: &Map, final_map: &Map, is_manual: bool)
@@ -201,7 +236,12 @@ fn  main()
         Err(e) => panic!("error: {}", e.description())
     };
 
-    let heuristic_func = ask_heuristic();
+    let algo_char = ask_algorithm();
+    let mut heuristic_func: HeuristicType = heuristics::misplaced_tiles;
+    if algo_char != 'c' {
+        heuristic_func = ask_heuristic();
+    }
+
     parse(&mut map, file);
 
     println!("Begin State:");
@@ -214,7 +254,7 @@ fn  main()
     let mut final_state = Map::new();
     if is_doable(&map, &final_grid) == 0
     {
-        final_state = expand(&map, &final_grid, &heuristic_func);
+        final_state = expand(&map, &final_grid, &heuristic_func, algo_char);
     }
     else { println!("undoable"); }
     println!();
