@@ -1,6 +1,6 @@
 use std::io::{BufRead, BufReader};
 use std::fs::File;
-use map::*;
+use crate::map::*;
 
 fn      get_size(width: &mut usize, height: &mut usize, line: String)
 {

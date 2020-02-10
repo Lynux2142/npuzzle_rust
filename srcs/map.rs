@@ -48,7 +48,8 @@ impl Map
                 while tmp >= 10 { value_size += 1; tmp /= 10; }
             }
             for _ in value_size..hole_size { print!(" "); }
-            print!("{}", self.grid[i]);
+            if self.grid[i] != 0 { print!("{}", self.grid[i]); }
+            else { print!(" "); }
             if (i + 1) % self.width != 0 { print!(" "); } else { println!(); }
         }
     }

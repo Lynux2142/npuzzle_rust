@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use map::*;
+use crate::map::*;
 
 pub fn  is_doable(map: &Map, final_grid: &HashMap<i32, i32>) -> i32
 {

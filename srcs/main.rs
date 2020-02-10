@@ -5,11 +5,11 @@ mod heuristics;
 mod map_procedure;
 mod make_final_grid;
 
-use map::*;
-use parsing::*;
-use is_doable::*;
-use make_final_grid::*;
-use map_procedure::core_swap;
+use crate::map::*;
+use crate::parsing::*;
+use crate::is_doable::*;
+use crate::make_final_grid::*;
+use crate::map_procedure::core_swap;
 
 use std::env;
 use std::fs::File;
@@ -19,11 +19,11 @@ use std::collections::HashMap;
 use std::collections::BinaryHeap;
 use std::io::{stdin, stdout, Write};
 
-type heuristic_type = fn(&Map, &HashMap<i32, i32>) -> i32;
+type HeuristicType = fn(&Map, &HashMap<i32, i32>) -> i32;
 
 fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                   close: &HashMap<String, Map>, goal_map: &HashMap<i32, i32>,
-                  heuristic_func: &heuristic_type)
+                  heuristic_func: &HeuristicType)
 {
     for i in "LURD".chars()
     {
@@ -85,7 +85,7 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
     }
 }
 
-fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &heuristic_type) -> Map {
+fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &HeuristicType) -> Map {
     let mut open = BinaryHeap::new();
     let mut close : HashMap<String, Map> = HashMap::new();
     let mut current = initial_state.clone();
@@ -106,7 +106,7 @@ fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &h
     current
 }
 
-fn ask_heuristic() -> heuristic_type
+fn ask_heuristic() -> HeuristicType
 {
     let mut s = String::new();
     println!("Veuillez selectionner un nombre entre 1 et 3 pour choisir votre heuristcs : ");
@@ -116,17 +116,17 @@ fn ask_heuristic() -> heuristic_type
     loop
     {
         print!("$> ");
-        stdout().flush();
+        let _ = stdout().flush();
         s.clear();
         stdin().read_line(&mut s).expect("Did not enter a correct string");
-        if (s.len() == 2)
+        if s.len() == 2
         {
             let cur_char = s.chars().next().unwrap();
-            if (cur_char == '1' || cur_char == '2' || cur_char == '3')
+            if cur_char == '1' || cur_char == '2' || cur_char == '3'
             {
-                if (cur_char == '1') {
+                if cur_char == '1' {
                     return heuristics::manhatan_distance;
-                } else if (cur_char == '2') {
+                } else if cur_char == '2' {
                     return heuristics::euclidean_distance;
                 }
                 else { return heuristics::misplaced_tiles; }
@@ -137,13 +137,55 @@ fn ask_heuristic() -> heuristic_type
     }
 }
 
+fn  test_solution(initial_map: &Map, final_map: &Map)
+{
+    let mut copy_state = initial_map.clone();
+
+    for hole_move in final_map.shortest_path.chars()
+    for hole_move in test.chars()
+    {
+        match hole_move
+        {
+            'U' =>
+            {
+                copy_state.grid[copy_state.hole] = copy_state.grid[copy_state.hole - copy_state.width];
+                copy_state.grid[copy_state.hole - copy_state.width] = 0;
+                copy_state.hole -= copy_state.width;
+            },
+            'L' =>
+            {
+                copy_state.grid[copy_state.hole] = copy_state.grid[copy_state.hole - 1];
+                copy_state.grid[copy_state.hole - 1] = 0;
+                copy_state.hole -= 1;
+            },
+            'D' =>
+            {
+                copy_state.grid[copy_state.hole] = copy_state.grid[copy_state.hole + copy_state.width];
+                copy_state.grid[copy_state.hole + copy_state.width] = 0;
+                copy_state.hole += copy_state.width;
+            },
+            'R' =>
+            {
+                copy_state.grid[copy_state.hole] = copy_state.grid[copy_state.hole + 1];
+                copy_state.grid[copy_state.hole + 1] = 0;
+                copy_state.hole += 1;
+            }
+            _ => panic!("stop, something wrong.")
+        }
+        copy_state.print();
+        println!();
+        let mut s = String::new();
+        let _ = stdout().flush();
+        stdin().read_line(&mut s).expect("");
+    }
+    println!("End in {} moves: {}", final_map.shortest_path.len(), final_map.shortest_path);
+}
+
 fn  main()
 {
     let args: Vec<String> = env::args().collect();
-    let mut map: Map = Map::new();
-
     if args.len() != 2 { println!("usage: ./npuzzle [puzzle]"); exit(0); }
-
+    let mut map: Map = Map::new();
     let file = match File::open(&args[1])
     {
         Ok(file) => file,
@@ -160,12 +202,12 @@ fn  main()
     // algo
     let final_grid = make_final_grid(map.width as i32, map.height as i32);
     // expand tous les enfants ?
+    let mut final_state = Map::new();
     if is_doable(&map, &final_grid) == 0
     {
-        let end_state = expand(&map, &final_grid, &heuristic_func);
-        println!("End State: ");
-        end_state.print();
-        println!("End in {} moves: {}", end_state.shortest_path.len(), end_state.shortest_path);
+        final_state = expand(&map, &final_grid, &heuristic_func);
     }
     else { println!("undoable"); }
+    println!();
+    test_solution(&map, &final_state);
 }

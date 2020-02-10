@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use map::Map;
+use crate::map::Map;
 
-type heuristic_type = fn(&Map, &HashMap<i32, i32>) -> i32;
+type HeuristicType = fn(&Map, &HashMap<i32, i32>) -> i32;
 
 enum Sign
 {
@@ -12,7 +12,6 @@ enum Sign
 
 // trouver un meilleur moyen de lui filer les heuristics
 // pour etre un peu plus modulaire
-use heuristics::manhatan_distance;
 
 /*
 #[allow(dead_code)]
@@ -49,7 +48,7 @@ fn swap(to_swap_map: &mut Vec<i32>, hole_index: &usize, index_diff: &usize, sign
 // take a ref to a map struct and a direction
 // generate another map state from this
 pub fn core_swap(current_map: &Map, goal_map: &HashMap<i32, i32>, direction: char,
-                 heuristic_func: &heuristic_type) -> Map
+                 heuristic_func: &HeuristicType) -> Map
 {
     let mut new_map = current_map.clone();
     // init new_map, a voir pour implementer le Trait clone
