@@ -17,9 +17,13 @@ use std::error::Error;
 use std::process::exit;
 use std::collections::HashMap;
 use std::collections::BinaryHeap;
+use std::io::{stdin, stdout, Write};
+
+type heuristic_type = fn(&Map, &HashMap<i32, i32>) -> i32;
 
 fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
-                  close: &HashMap<String, Map>, goal_map: &HashMap<i32, i32>)
+                  close: &HashMap<String, Map>, goal_map: &HashMap<i32, i32>,
+                  heuristic_func: &heuristic_type)
 {
     for i in "LURD".chars()
     {
@@ -31,7 +35,7 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                 // left
                 if current_state.hole % current_state.width > 0
                 {
-                    Some(core_swap(current_state, goal_map, i))
+                    Some(core_swap(current_state, goal_map, i, heuristic_func))
                 }
                 else { None }
             },
@@ -40,7 +44,7 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                 // uo
                 if current_state.hole / current_state.width > 0
                 {
-                    Some(core_swap(current_state, goal_map, i))
+                    Some(core_swap(current_state, goal_map, i, heuristic_func))
                 }
                 else { None }
             },
@@ -49,7 +53,7 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                 // right
                 if current_state.hole % current_state.width < current_state.width - 1
                 {
-                    Some(core_swap(current_state, goal_map, i))
+                    Some(core_swap(current_state, goal_map, i, heuristic_func))
                 }
                 else { None }
             },
@@ -58,7 +62,7 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
                 // down
                 if current_state.hole / current_state.width < current_state.height - 1
                 {
-                    Some(core_swap(current_state, goal_map, i))
+                    Some(core_swap(current_state, goal_map, i, heuristic_func))
                 }
                 else { None }
             },
@@ -81,14 +85,14 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
     }
 }
 
-fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>) -> Map {
+fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &heuristic_type) -> Map {
     let mut open = BinaryHeap::new();
     let mut close : HashMap<String, Map> = HashMap::new();
     let mut current = initial_state.clone();
 
     while current.heuristic_value > 0
     {
-        generate_child(&current, &mut open, &close, goal_map);
+        generate_child(&current, &mut open, &close, goal_map, heuristic_func);
         //   appel les 4 fonctions swap
         //   pour chaque return :
         //       Regarer si deja explorer, si non push dans opens
@@ -100,6 +104,37 @@ fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>) -> Map {
         };
     }
     current
+}
+
+fn ask_heuristic() -> heuristic_type
+{
+    let mut s = String::new();
+    println!("Veuillez selectionner un nombre entre 1 et 3 pour choisir votre heuristcs : ");
+    println!("- 1 : Manhattan Distance");
+    println!("- 2 : Euclidean Distance");
+    println!("- 3 : Misplaced Tiles");
+    loop
+    {
+        print!("$> ");
+        stdout().flush();
+        s.clear();
+        stdin().read_line(&mut s).expect("Did not enter a correct string");
+        if (s.len() == 2)
+        {
+            let cur_char = s.chars().next().unwrap();
+            if (cur_char == '1' || cur_char == '2' || cur_char == '3')
+            {
+                if (cur_char == '1') {
+                    return heuristics::manhatan_distance;
+                } else if (cur_char == '2') {
+                    return heuristics::euclidean_distance;
+                }
+                else { return heuristics::misplaced_tiles; }
+                //return cur_char
+            }
+        }
+        println!("Veuillez entrer un chiffre entre 1 et 3");
+    }
 }
 
 fn  main()
@@ -115,6 +150,7 @@ fn  main()
         Err(e) => panic!("error: {}", e.description())
     };
 
+    let heuristic_func = ask_heuristic();
     parse(&mut map, file);
 
     println!("Begin State:");
@@ -126,7 +162,7 @@ fn  main()
     // expand tous les enfants ?
     if is_doable(&map, &final_grid) == 0
     {
-        let end_state = expand(&map, &final_grid);
+        let end_state = expand(&map, &final_grid, &heuristic_func);
         println!("End State: ");
         end_state.print();
         println!("End in {} moves: {}", end_state.shortest_path.len(), end_state.shortest_path);

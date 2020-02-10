@@ -1,6 +1,7 @@
 // File with our heuristics
 
 use std::collections::HashMap;
+use math::round::ceil;
 
 use map::Map;
 
@@ -36,3 +37,36 @@ pub fn manhatan_distance(current_map: &Map, goal_map: &HashMap<i32, i32>) -> i32
     }
     distance
 }
+
+pub fn euclidean_distance(current_map: &Map, goal_map: &HashMap<i32, i32>) -> i32 {
+    // calcul index x
+    // calcul index y
+    let mut distance = 0;
+    let mut index = 0;
+    for x in current_map.grid.iter()
+    {
+        let goal_val = goal_map[&x];
+        let x_diff = (goal_val % current_map.width as i32)
+            - (index % current_map.width) as i32;
+        let y_diff = (goal_val / current_map.width as i32)
+            - (index / current_map.width) as i32;
+        distance += ceil(<f64>::sqrt((<i32>::pow(x_diff.abs(), 2)
+                                                   + <i32>::pow(y_diff.abs(), 2)) as f64));
+        index += 1;
+    }
+    distance
+}
+
+pub fn misplaced_tiles(current_map: &Map, goal_map: &HashMap<i32, i32>) -> i32 {
+    // calcul index x
+    // calcul index y
+    let mut distance = 0;
+    let mut index = 0;
+    for x in current_map.grid.iter()
+    {
+        if (goal_map[&x] != index) { distance += 1; }
+        index += 1;
+    }
+    distance
+}
+
