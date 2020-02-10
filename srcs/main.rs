@@ -89,11 +89,12 @@ fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &H
     let mut open = BinaryHeap::new();
     let mut close : HashMap<String, Map> = HashMap::new();
     let mut current = initial_state.clone();
-    let mut time_complexity: u32 = 1;
+    let mut time_complexity: u32 = 0;
     let mut size_complexity: u32 = 0;
 
     while current.heuristic_value > 0
     {
+        time_complexity += 1;
         print!("\rtime complexity : {}", time_complexity);
         generate_child(&current, &mut open, &close, goal_map, heuristic_func, algo_char);
         if open.len() as u32 > size_complexity {
@@ -106,7 +107,6 @@ fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &H
         close.insert(current.get_key(), current.clone());
         current = match open.pop() {
             Some(tmp) => {
-                time_complexity += 1;
                 tmp
             },
             None => break
@@ -250,12 +250,6 @@ fn  main()
         }
     };
 
-    let algo_char = ask_algorithm();
-    let mut heuristic_func: HeuristicType = heuristics::misplaced_tiles;
-    if algo_char != 'c' {
-        heuristic_func = ask_heuristic();
-    }
-
     parse(&mut map, file);
 
     println!("Begin State:");
@@ -265,14 +259,20 @@ fn  main()
     // algo
     let final_grid = make_final_grid(map.width as i32, map.height as i32);
     // expand tous les enfants ?
-    let mut final_state = (0, 0, Map::new());
     if is_doable(&map, &final_grid) == 0
     {
-        final_state = expand(&map, &final_grid, &heuristic_func, algo_char);
+        let algo_char = ask_algorithm();
+        let mut heuristic_func: HeuristicType = heuristics::misplaced_tiles;
+        if algo_char != 'c' {
+            heuristic_func = ask_heuristic();
+        }
+        println!();
+
+        let final_state = expand(&map, &final_grid, &heuristic_func, algo_char);
+        println!();
+        test_solution(&map, &final_state.2, is_manual);
+        println!("time_complexity : {}", final_state.1);
+        println!("size_complexity : {}", final_state.0);
     }
     else { println!("undoable"); }
-    println!();
-    test_solution(&map, &final_state.2, is_manual);
-    println!("time_complexity : {}", final_state.1);
-    println!("size_complexity : {}", final_state.0);
 }
