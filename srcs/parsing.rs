@@ -145,6 +145,9 @@ pub fn  parse(map: & mut Map, file: File)
         }
     }
     map.size = map.width * map.height;
+    if map.size == 0 {
+        println!("Something went Wrong!");
+    }
     verify_grid(&map);
 
 }
