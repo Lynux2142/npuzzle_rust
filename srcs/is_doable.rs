@@ -3,12 +3,12 @@ use crate::map::*;
 
 pub fn  is_doable(map: &Map, final_grid: &HashMap<i32, i32>) -> i32
 {
-    let mut j = -1i32;
-    let n = final_grid[&0i32];
+    let mut j: i32 = -1;
+    let n = final_grid[&0];
     let mut grid = map.grid.clone();
-    for i in 0..map.size { if grid[i] == 0 { j = i as i32; } }
-    let mut np = <i32>::abs(n % map.width as i32 - j % map.width as i32) +
-        <i32>::abs(n / map.width as i32 - j / map.width as i32);
+    for i in 0..map.size { if grid[i as usize] == 0 { j = i; } }
+    let mut np = <i32>::abs(n % map.width - j % map.width) +
+        <i32>::abs(n / map.width - j / map.width);
     for n in (1..(map.size)).rev()
     {
         let test = final_grid[&grid[j as usize]];
@@ -21,7 +21,7 @@ pub fn  is_doable(map: &Map, final_grid: &HashMap<i32, i32>) -> i32
             np += 1;
         }
         j = 0;
-        while grid[j as usize] != n as i32 { j += 1; }
+        while grid[j as usize] != n { j += 1; }
     }
     1 & np
 }

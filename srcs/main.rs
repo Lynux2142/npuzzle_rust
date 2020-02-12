@@ -9,7 +9,7 @@ use crate::map::*;
 use crate::parsing::*;
 use crate::is_doable::*;
 use crate::make_final_grid::*;
-use crate::map_procedure::core_swap;
+use crate::map_procedure::*;
 
 use std::env;
 use std::fs::File;
@@ -22,17 +22,15 @@ use std::io::{stdin, stdout, Write};
 type HeuristicType = fn(&Map, &HashMap<i32, i32>) -> i32;
 
 fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
-                   close: &HashMap<String, Map>, goal_map: &HashMap<i32, i32>,
+                   close: &mut HashMap<String, Map>, goal_map: &HashMap<i32, i32>,
                    heuristic_func: &HeuristicType, algo_char: char)
 {
     for i in "LURD".chars()
     {
-        // check
         let new_map = match i
         {
             'L' =>
             {
-                // left
                 if current_state.hole % current_state.width > 0
                 {
                     Some(core_swap(current_state, goal_map, i, heuristic_func, algo_char))
@@ -41,7 +39,6 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
             },
             'U' =>
             {
-                // uo
                 if current_state.hole / current_state.width > 0
                 {
                     Some(core_swap(current_state, goal_map, i, heuristic_func, algo_char))
@@ -50,7 +47,6 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
             },
             'R' =>
             {
-                // right
                 if current_state.hole % current_state.width < current_state.width - 1
                 {
                     Some(core_swap(current_state, goal_map, i, heuristic_func, algo_char))
@@ -59,7 +55,6 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
             },
             'D' =>
             {
-                // down
                 if current_state.hole / current_state.width < current_state.height - 1
                 {
                     Some(core_swap(current_state, goal_map, i, heuristic_func, algo_char))
@@ -72,20 +67,23 @@ fn  generate_child(current_state: &Map, open: &mut BinaryHeap<Map>,
         {
             Some(new_map) =>
             {
-                // check if explore
                 if close.contains_key(&new_map.get_key())
                 {
-                    // already explored
-                    // go udpate
-                    //       println!("oulbiez pas de faire le update !!!!");
-                } else { open.push(new_map); }
+                    if new_map.cost < close[&new_map.get_key()].cost
+                    {
+                        close.remove(&new_map.get_key());
+                        open.push(new_map);
+                    }
+                }
+                else { open.push(new_map); }
             },
-            None => {continue;}
+            None => { continue; }
         };
     }
 }
 
-fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &HeuristicType, algo_char: char) -> (u32, u32, Map) {
+fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &HeuristicType, algo_char: char) -> (u32, u32, Map)
+{
     let mut open = BinaryHeap::new();
     let mut close : HashMap<String, Map> = HashMap::new();
     let mut current = initial_state.clone();
@@ -96,19 +94,11 @@ fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &H
     {
         time_complexity += 1;
         print!("\rtime complexity : {}", time_complexity);
-        generate_child(&current, &mut open, &close, goal_map, heuristic_func, algo_char);
-        if open.len() as u32 > size_complexity {
-            size_complexity = open.len() as u32;
-        }
-        //   appel les 4 fonctions swap
-        //   pour chaque return :
-        //       Regarer si deja explorer, si non push dans opens
-        //       sinon verifier que le chemins ne soit pas plus court
+        generate_child(&current, &mut open, &mut close, goal_map, heuristic_func, algo_char);
+        if open.len() as u32 > size_complexity { size_complexity = open.len() as u32; }
         close.insert(current.get_key(), current.clone());
         current = match open.pop() {
-            Some(tmp) => {
-                tmp
-            },
+            Some(tmp) => { tmp },
             None => break
         };
     }
@@ -118,9 +108,6 @@ fn  expand(initial_state: &Map, goal_map: &HashMap<i32, i32>, heuristic_func: &H
 
 fn ask_algorithm() -> char
 {
-    // a -> normal
-    // b -> greedy
-    // b -> uniform
     let mut s = String::new();
     println!("Please choose a caracter between a and c in order to choose your algorithm : ");
     println!("- a : A * ( Default alogrithm )");
@@ -135,14 +122,9 @@ fn ask_algorithm() -> char
         let cur_char = s.chars().next().unwrap();
         if s.len() == 2
         {
-            if cur_char == 'a' || cur_char == 'b' || cur_char == 'c'
-            {
-                return cur_char;
-            }
+            if cur_char == 'a' || cur_char == 'b' || cur_char == 'c' { return cur_char; }
         }
-        else if cur_char == '\n' {
-            return 'a';
-        }
+        else if cur_char == '\n' { return 'a'; }
         println!("choose a caracter between a and c");
     }
 }
@@ -165,18 +147,12 @@ fn ask_heuristic() -> HeuristicType
         {
             if cur_char == '1' || cur_char == '2' || cur_char == '3'
             {
-                if cur_char == '1' {
-                    return heuristics::manhatan_distance;
-                } else if cur_char == '2' {
-                    return heuristics::euclidean_distance;
-                }
+                if cur_char == '1' { return heuristics::manhatan_distance; }
+                else if cur_char == '2' { return heuristics::euclidean_distance; }
                 else { return heuristics::misplaced_tiles; }
-                //return cur_char
             }
         }
-        else if cur_char == '\n' {
-            return heuristics::manhatan_distance;
-        }
+        else if cur_char == '\n' { return heuristics::manhatan_distance; }
         println!("Enter a valid number between 1 and 3");
     }
 
@@ -186,44 +162,16 @@ fn  test_solution(initial_map: &Map, final_map: &Map, is_manual: bool)
 {
     let mut copy_state = initial_map.clone();
 
-    for hole_move in final_map.shortest_path.chars()
+    for direction in final_map.shortest_path.chars()
     {
-        match hole_move
-        {
-            'U' =>
-            {
-                copy_state.grid[copy_state.hole] = copy_state.grid[copy_state.hole - copy_state.width];
-                copy_state.grid[copy_state.hole - copy_state.width] = 0;
-                copy_state.hole -= copy_state.width;
-            },
-            'L' =>
-            {
-                copy_state.grid[copy_state.hole] = copy_state.grid[copy_state.hole - 1];
-                copy_state.grid[copy_state.hole - 1] = 0;
-                copy_state.hole -= 1;
-            },
-            'D' =>
-            {
-                copy_state.grid[copy_state.hole] = copy_state.grid[copy_state.hole + copy_state.width];
-                copy_state.grid[copy_state.hole + copy_state.width] = 0;
-                copy_state.hole += copy_state.width;
-            },
-            'R' =>
-            {
-                copy_state.grid[copy_state.hole] = copy_state.grid[copy_state.hole + 1];
-                copy_state.grid[copy_state.hole + 1] = 0;
-                copy_state.hole += 1;
-            }
-            _ => panic!("Wrong letters.")
-
-        }
+        copy_state = swap(&copy_state, direction);
         copy_state.print();
         println!();
-        if is_manual {
+        if is_manual
+        {
             let mut s = String::new();
             let _ = stdout().flush();
             stdin().read_line(&mut s).expect("");
-
         }
     }
     println!("End in {} moves: {}", final_map.shortest_path.len(), final_map.shortest_path);
@@ -234,38 +182,38 @@ fn  main()
     let args: Vec<String> = env::args().collect();
     let mut is_manual = false;
     if args.len() == 3 {
-        if !(args[2] == "--manual") {
+        if !(args[2] == "--manual")
+        {
             println!("usage: ./npuzzle puzzle [--manual]\n\t--manual : print states step by step");
         }
-        else {is_manual = true;}
+        else { is_manual = true; }
     }
-    if args.len() != 2 && args.len() != 3 {println!("usage: ./npuzzle puzzle [--manual]\n\t--manual : print states step by step"); exit(0);}
+    if args.len() != 2 && args.len() != 3
+    {
+        println!("usage: ./npuzzle puzzle [--manual]\n\t--manual : print states step by step");
+        exit(0)
+    }
     let mut map: Map = Map::new();
     let file = match File::open(&args[1])
     {
         Ok(file) => file,
-        Err(e) => {
+        Err(e) =>
+        {
             println!("error : {}", e.description());
             exit(1);
         }
     };
-
     parse(&mut map, file);
-
     println!("Begin State:");
     map.print();
     println!();
+    let final_grid = make_final_grid(map.width, map.height);
 
-    // algo
-    let final_grid = make_final_grid(map.width as i32, map.height as i32);
-    // expand tous les enfants ?
     if is_doable(&map, &final_grid) == 0
     {
         let algo_char = ask_algorithm();
         let mut heuristic_func: HeuristicType = heuristics::misplaced_tiles;
-        if algo_char != 'c' {
-            heuristic_func = ask_heuristic();
-        }
+        if algo_char != 'c' { heuristic_func = ask_heuristic(); }
         println!();
 
         let final_state = expand(&map, &final_grid, &heuristic_func, algo_char);

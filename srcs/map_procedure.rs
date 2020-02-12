@@ -4,97 +4,33 @@ use crate::map::Map;
 
 type HeuristicType = fn(&Map, &HashMap<i32, i32>) -> i32;
 
-enum Sign
+pub fn swap(current_map: &Map, direction: char) -> Map
 {
-    POSITIF,
-    NEGATIF
-}
+    let mut new_map = current_map.clone();
+    let gap: i32;
 
-// trouver un meilleur moyen de lui filer les heuristics
-// pour etre un peu plus modulaire
-
-/*
-#[allow(dead_code)]
-fn get_index(grid: &Vec<i32>, to_search: i32) -> Option<usize> {
-    for i in 0..grid.len() {
-        if grid[i] == to_search {
-            return Some(i)
-        }
-    }
-    None
-}
-*/
-
-fn swap(to_swap_map: &mut Vec<i32>, hole_index: &usize, index_diff: &usize, sign: Sign)
-{
-    match sign
+    match direction
     {
-        Sign::POSITIF =>
-        {
-            let tmp = to_swap_map[(hole_index + index_diff)];
-            to_swap_map[*hole_index] = tmp;
-            to_swap_map[(hole_index + index_diff)] = 0; // hole
-
-        },
-        Sign::NEGATIF =>
-        {
-            let tmp = to_swap_map[(hole_index - index_diff)];
-            to_swap_map[*hole_index] = tmp;
-            to_swap_map[(hole_index - index_diff)] = 0; // hole
-        }
-    }
+        'L' | 'R' => { gap = if direction == 'R' { 1 } else { -1 }; },
+        _ => { gap = if direction == 'D' { new_map.width } else { -new_map.width } }
+    };
+    new_map.grid[new_map.hole as usize] = new_map.grid[(new_map.hole + gap) as usize];
+    new_map.grid[(new_map.hole + gap) as usize] = 0;
+    new_map.hole += gap;
+    new_map.shortest_path.push(direction);
+    new_map
 }
 
-// take a ref to a map struct and a direction
-// generate another map state from this
 pub fn core_swap(current_map: &Map, goal_map: &HashMap<i32, i32>, direction: char,
                  heuristic_func: &HeuristicType, algo_char: char) -> Map
 {
-    let mut new_map = current_map.clone();
-    // init new_map, a voir pour implementer le Trait clone
-
-    // shortest path
-    new_map.shortest_path.push(direction);
-
-    let mut new_grid = &mut new_map.grid;
-    match direction
-    {
-        'L' =>
-        {
-            // left
-            swap(&mut new_grid, &current_map.hole, &1, Sign::NEGATIF);
-            new_map.hole -= 1;
-        },
-        'U' =>
-        {
-            // up
-            swap(&mut new_grid, &current_map.hole, &current_map.width, Sign::NEGATIF);
-            new_map.hole -= current_map.width;
-        },
-        'R' =>
-        {
-            // right
-            swap(&mut new_grid, &current_map.hole, &1, Sign::POSITIF);
-            new_map.hole += 1;
-        },
-        'D' =>
-        {
-            // down
-            swap(&mut new_grid, &current_map.hole, &current_map.width, Sign::POSITIF);
-            new_map.hole += current_map.width;
-        },
-            // alors je me permet un panic car on est vraiment
-            // pas sense envoye une mauvaise lettre ...
-        _ => { panic!("Wrong letters"); }
-    };
-//    new_map.heuristic_value = manhatan_distance(&new_map, goal_map);
+    let mut new_map = swap(current_map, direction);
     new_map.heuristic_value = heuristic_func(&new_map, goal_map);
-    if algo_char == 'a' {
+    if algo_char == 'a'
+    {
         new_map.cost = new_map.shortest_path.len() as i32 + new_map.heuristic_value;
-    } else if algo_char == 'b' {
-        new_map.cost = new_map.heuristic_value;
-    } else {
-        new_map.cost = new_map.shortest_path.len() as i32;
     }
+    else if algo_char == 'b' { new_map.cost = new_map.heuristic_value; }
+    else { new_map.cost = new_map.shortest_path.len() as i32; }
     new_map
 }

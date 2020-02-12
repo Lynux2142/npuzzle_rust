@@ -4,9 +4,9 @@ pub fn make_final_grid(width: i32, height: i32) -> HashMap<i32, i32>
 {
     let mut final_grid = HashMap::new();
     let size = width * height;
-    let mut x_min_max = ( 0i32, width - 1 );
-    let mut y_min_max = ( 0i32, height - 1 );
-    let mut i = 1i32;
+    let mut x_min_max: (i32, i32) = ( 0, width - 1 );
+    let mut y_min_max: (i32, i32) = ( 0, height - 1 );
+    let mut i: i32 = 1;
 
     while i <= size
     {

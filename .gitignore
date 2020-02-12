@@ -2,11 +2,3 @@
 .DS_Store
 /target
 puzzles
-
-
-#Added by cargo
-#
-#already existing elements are commented out
-
-#/target
-**/*.rs.bk

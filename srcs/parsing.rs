@@ -3,7 +3,7 @@ use std::fs::File;
 use crate::map::*;
 use std::process::exit;
 
-fn      get_size(width: &mut usize, height: &mut usize, line: String)
+fn      get_size(width: &mut i32, height: &mut i32, line: String)
 {
     let values = line.split(" ").collect::<Vec<&str>>();
 
@@ -11,7 +11,7 @@ fn      get_size(width: &mut usize, height: &mut usize, line: String)
     {
         1 =>
         {
-            let size = match values[0].parse::<usize>()
+            let size = match values[0].parse::<i32>()
             {
                 Ok(size) => { size },
                 Err(e) => {
@@ -24,7 +24,7 @@ fn      get_size(width: &mut usize, height: &mut usize, line: String)
         },
         2 =>
         {
-            let size = match values[0].parse::<usize>()
+            let size = match values[0].parse::<i32>()
             {
                 Ok(size) => { size },
                 Err(e) => {
@@ -33,7 +33,7 @@ fn      get_size(width: &mut usize, height: &mut usize, line: String)
                 }
             };
             *width = size;
-            let size = match values[1].parse::<usize>()
+            let size = match values[1].parse::<i32>()
             {
                 Ok(size) => { size },
                 Err(e) => {
@@ -50,16 +50,12 @@ fn      get_size(width: &mut usize, height: &mut usize, line: String)
     }
 }
 
-fn      set_values(grid: &mut Vec<i32>, width: usize, y: usize, values: std::str::SplitWhitespace) -> i32
+fn      set_values(grid: &mut Vec<i32>, width: i32, y: i32, values: std::str::SplitWhitespace) -> i32
 {
-    let mut hole = -1i32;
-    let mut x = 0usize;
+    let mut hole: i32 = -1;
+    let mut x: i32 = 0;
     let mut i = 0;
 
-    /*if (values.len() != width) {
-        println!("Wrong numbers");
-        exit(5);
-    }*/
     for value in values
     {
         let tmp = match value.parse::<i32>()
@@ -70,8 +66,8 @@ fn      set_values(grid: &mut Vec<i32>, width: usize, y: usize, values: std::str
                 exit(1);
             }
         };
-        grid[y * width + x] = tmp;
-        if tmp == 0 { hole = (y * width + x) as i32; }
+        grid[(y * width + x) as usize] = tmp;
+        if tmp == 0 { hole = y * width + x; }
         x += 1;
         i += 1;
     }
@@ -85,7 +81,7 @@ fn      set_values(grid: &mut Vec<i32>, width: usize, y: usize, values: std::str
 fn verify_grid(map: & Map) -> bool {
 
     for i in 0..map.size {
-        if map.grid.contains(&(i as i32)) == false {
+        if map.grid.contains(&(i)) == false {
             println!("wrong numbers");
             exit(1);
         }
@@ -96,8 +92,8 @@ fn verify_grid(map: & Map) -> bool {
 pub fn  parse(map: & mut Map, file: File)
 {
     let reader = BufReader::new(file);
-    let mut y = 0usize;
-    let mut i = 0;
+    let mut y: i32 = 0;
+    let mut i: i32 = 0;
 
     for line in reader.lines()
     {
@@ -119,10 +115,10 @@ pub fn  parse(map: & mut Map, file: File)
                 {
                     if is_com != '#'
                     {
-                        if map.width == 0usize
+                        if map.width == 0
                         {
                             get_size(&mut map.width, &mut map.height, line);
-                            map.grid.resize(map.width * map.height, 0);
+                            map.grid.resize((map.width * map.height) as usize, 0);
                         }
                         else
                         {
@@ -132,7 +128,7 @@ pub fn  parse(map: & mut Map, file: File)
                             }
                             let tmp = set_values(&mut map.grid, map.width, y, line.split_whitespace());
                             i += 1;
-                            if tmp != -1i32 { map.hole = tmp as usize; }
+                            if tmp != -1 { map.hole = tmp; }
                             y += 1;
                         }
                     }

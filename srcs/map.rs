@@ -4,13 +4,13 @@ use std::cmp::Ordering;
 #[derive(Debug)]
 pub struct Map
 {
-    pub size: usize,
-    pub width: usize,
-    pub height: usize,
-    pub grid: Vec<i32>, // ptr to array of i32
-    pub hole: usize,
+    pub size: i32,
+    pub width: i32,
+    pub height: i32,
+    pub grid: Vec<i32>,
+    pub hole: i32,
     pub heuristic_value: i32,
-    pub cost: i32, // heuristic + chemins actuel
+    pub cost: i32,
     pub shortest_path: String,
 }
 
@@ -35,11 +35,11 @@ impl Map
     {
         let mut hole_size = 0;
         let mut value_size;
-        let mut tmp = (self.size) as i32;
+        let mut tmp = self.size;
 
         while tmp >= 10 { hole_size += 1; tmp /= 10; }
 
-        for i in 0..self.size
+        for i in 0..self.size as usize
         {
             value_size = 0;
             if self.grid[i] != 0
@@ -50,23 +50,12 @@ impl Map
             for _ in value_size..hole_size { print!(" "); }
             if self.grid[i] != 0 { print!("{}", self.grid[i]); }
             else { print!(" "); }
-            if (i + 1) % self.width != 0 { print!(" "); } else { println!(); }
+            if (i + 1) % self.width as usize != 0 { print!(" "); } else { println!(); }
         }
     }
 
     pub fn get_key(&self) -> String { format!("{:?}", self.grid) }
-    // new from_map ()
 }
-/*
-    pub size: usize,
-    pub width: usize,
-    pub height: usize,
-    pub grid: Vec<i32>, // ptr to array of i32
-    pub hole: usize,
-    pub heuristic_value: i32,
-    pub cost: i32, // heuristic + chemins actuel
-    pub shortest_path: String
-*/
 
 impl Clone for Map
 {
@@ -90,14 +79,10 @@ impl Ord for Map
 {
     fn cmp(&self, other: &Map) -> Ordering
     {
-        // Notice that the we flip the ordering on costs.
-        // In case of a tie we compare positions - this step is necessary
-        // to make implementations of `PartialEq` and `Ord` consistent.
         other.cost.cmp(&self.cost)
     }
 }
 
-// `PartialOrd` needs to be implemented as well.
 impl PartialOrd for Map
 {
     fn partial_cmp(&self, other: &Map) -> Option<Ordering>
